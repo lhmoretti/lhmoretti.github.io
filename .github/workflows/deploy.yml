@@ -21,8 +21,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+
+      - name: Read pnpm version
+        run: pnpm --version
 
       - uses: actions/setup-node@v4
         with:
