@@ -1,0 +1,50 @@
+---
+import PageLayout from "@layouts/PageLayout.astro";
+import TopLayout from "@layouts/TopLayout.astro";
+import BottomLayout from "@layouts/BottomLayout.astro";
+import { getLocalizedCollection } from "@lib/content";
+import { useTranslations, type Lang } from "@i18n/ui";
+
+const { lang = "es" } = Astro.props as { lang?: Lang };
+const t = useTranslations(lang);
+
+const collection = await getLocalizedCollection("courses", lang);
+const courses = await Promise.all(
+  collection.map(async (item) => {
+    const { Content } = await item.render();
+    return { ...item, Content };
+  })
+);
+---
+
+<PageLayout title={t("courses.title")} description={t("courses.description")} lang={lang}>
+  <TopLayout>
+    <div class="animate page-heading">{t("courses.title")}</div>
+  </TopLayout>
+  <BottomLayout>
+    <ul>
+      {
+        courses.map((entry) => (
+          <li class="animate border-b border-term-border mt-6 py-12 first-of-type:mt-0 first-of-type:pt-0 last-of-type:border-none">
+            <div class="text-sm uppercase mb-4 text-term-dim">
+              {entry.data.startDate} - {entry.data.endDate} ({entry.data.duration})
+            </div>
+            <div class="text-term-fg font-semibold">{entry.data.degree}</div>
+            <div class="text-sm font-semibold">{entry.data.institute}</div>
+            {entry.data.description && (
+              <div class="prose dark:prose-invert mt-2">{entry.data.description}</div>
+            )}
+            {entry?.data?.courses?.length !== 0 && (
+              <ul class="list-disc list-inside mt-2">
+                {entry?.data?.courses?.map((course: string) => (
+                  <li>{course}</li>
+                ))}
+              </ul>
+            )}
+            <div class="text-sm mt-2">{entry.data.location}</div>
+          </li>
+        ))
+      }
+    </ul>
+  </BottomLayout>
+</PageLayout>

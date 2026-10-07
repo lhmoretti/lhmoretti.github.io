@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  overflow-y: scroll;
+  color-scheme: dark;
+  background-color: #0c0a06;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html,
+body {
+  @apply h-full w-full antialiased;
+  @apply bg-term-bg;
+  @apply text-term-text;
+}
+
+body {
+  @apply relative flex flex-col;
+}
+
+main {
+  @apply flex flex-col flex-1 bg-term-bg;
+}
+
+header {
+  @apply border-b border-term-border bg-term-bg/90 backdrop-blur-sm;
+}
+
+a {
+  @apply text-term-fg hover:underline underline-offset-4;
+}
+
+article {
+  @apply prose dark:prose-invert max-w-full pb-12;
+}
+
+.page-heading {
+  @apply font-semibold text-term-fg;
+}
+
+.page-heading::before {
+  content: "$ ";
+  @apply text-term-dim;
+}
+
+::selection {
+  background: #ffb000;
+  color: #0c0a06;
+}
+
+/* subtle CRT glow on headings */
+h1, h2, .glow {
+  text-shadow: 0 0 8px rgba(255, 176, 0, 0.25);
+}
+
+/* scanlines overlay */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.12) 0px,
+    rgba(0, 0, 0, 0.12) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    background: none;
+  }
+}
+
+.cursor::after {
+  content: "█";
+  @apply text-term-fg;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* styles for public/js/animate.js */
+.animate {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.animate.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+article img {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  display: block;
+  margin: 0 auto;
+}

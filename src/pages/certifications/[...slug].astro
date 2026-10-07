@@ -1,0 +1,36 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import PageLayout from "@layouts/PageLayout.astro";
+import TopLayout from "@layouts/TopLayout.astro";
+import BottomLayout from "@layouts/BottomLayout.astro";
+import ArticleTopLayout from "@layouts/ArticleTopLayout.astro";
+import Certifications from "@components/Certifications";
+import { stripLocale } from "@lib/content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("certifications");
+  return posts
+    .filter((certs) => certs.slug.split("/")[0] === "es")
+    .map((certs) => ({
+      params: { slug: stripLocale(certs.slug) },
+      props: certs,
+    }));
+}
+
+type Props = CollectionEntry<"certifications">;
+const certs = Astro.props;
+const { title, summary, imgUrls } = certs.data;
+---
+
+<PageLayout title={title} description={summary} lang="es">
+  <TopLayout>
+    <div class="animate">
+      <ArticleTopLayout entry={certs} lang="es" />
+    </div>
+  </TopLayout>
+  <BottomLayout>
+    <div class="animate">
+      <Certifications client:load lang="es" data={[{ imgUrls }]} />
+    </div>
+  </BottomLayout>
+</PageLayout>

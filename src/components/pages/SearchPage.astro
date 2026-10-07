@@ -1,0 +1,31 @@
+---
+import PageLayout from "@layouts/PageLayout.astro";
+import TopLayout from "@layouts/TopLayout.astro";
+import BottomLayout from "@layouts/BottomLayout.astro";
+import Search from "@components/Search";
+import { getLocalizedCollection, stripLocale } from "@lib/content";
+import { useTranslations, type Lang } from "@i18n/ui";
+
+const { lang = "es" } = Astro.props as { lang?: Lang };
+const t = useTranslations(lang);
+
+const posts = (await getLocalizedCollection("certifications", lang)).filter((post) => !post.data.draft);
+const projects = (await getLocalizedCollection("projects", lang)).filter((post) => !post.data.draft);
+
+const data = [...posts, ...projects].map((entry) => ({
+  collection: entry.collection,
+  slug: stripLocale(entry.slug),
+  data: { title: entry.data.title, summary: entry.data.summary, tags: (entry.data as any).tags ?? [] },
+}));
+---
+
+<PageLayout title={t("search.title")} description={t("search.description")} lang={lang}>
+  <TopLayout>
+    <div class="animate page-heading">{t("search.title")}</div>
+  </TopLayout>
+  <BottomLayout>
+    <div class="animate">
+      <Search client:load lang={lang} data={data} />
+    </div>
+  </BottomLayout>
+</PageLayout>

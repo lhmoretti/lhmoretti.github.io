@@ -1,0 +1,23 @@
+---
+import PageLayout from "@layouts/PageLayout.astro";
+import TopLayout from "@layouts/TopLayout.astro";
+import BottomLayout from "@layouts/BottomLayout.astro";
+import { useTranslations, type Lang } from "@i18n/ui";
+
+const { lang = "es", type } = Astro.props as { lang?: Lang; type: "privacy" | "terms" };
+const t = useTranslations(lang);
+
+const title = type === "privacy" ? t("legal.privacy.title") : t("legal.terms.title");
+const paragraphs = (type === "privacy" ? t("legal.privacy.body") : t("legal.terms.body")).split("\n\n");
+---
+
+<PageLayout title={title} description={title} lang={lang}>
+  <TopLayout>
+    <div class="animate page-heading">{title}</div>
+  </TopLayout>
+  <BottomLayout>
+    <div class="animate space-y-4 text-term-text/90">
+      {paragraphs.map((p) => <p>{p}</p>)}
+    </div>
+  </BottomLayout>
+</PageLayout>

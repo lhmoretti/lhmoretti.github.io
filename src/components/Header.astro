@@ -1,0 +1,119 @@
+---
+import { SITE, LINKS } from "@consts";
+import { cn } from "@lib/utils";
+import { localizedPath, switchLangPath } from "@i18n/utils";
+import { type Lang } from "@i18n/ui";
+import Container from "@components/Container.astro";
+
+const { lang = "es" } = Astro.props as { lang?: Lang };
+const { pathname } = Astro.url;
+const subpath = pathname.replace(/^\/en/, "").match(/[^/]+/g);
+const otherLang = lang === "es" ? "en" : "es";
+---
+
+<header id="header" class="fixed top-0 w-full h-16 z-50">
+  <Container size="md">
+    <div class="relative h-full w-full">
+      <div class="absolute left-0 top-1/2 -translate-y-1/2 flex gap-1 text-sm">
+        <a href={localizedPath(lang, "/")} class="hover:no-underline text-term-fg">
+          lucas@moretti<span class="text-term-dim">:~$</span>
+        </a>
+      </div>
+
+      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <nav class="hidden md:flex items-center justify-center text-sm gap-4">
+          {
+            LINKS.map((LINK) => (
+              <a
+                href={localizedPath(lang, LINK.HREF)}
+                class={cn(
+                  "text-current hover:no-underline hover:text-term-fg",
+                  (pathname === localizedPath(lang, LINK.HREF)) || "/" + subpath?.[0] === LINK.HREF
+                    ? "text-term-fg font-bold"
+                    : "text-term-text"
+                )}
+              >
+                ~{LINK.HREF === "/" ? "" : LINK.HREF}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+
+      <div class="buttons absolute right-0 top-1/2 -translate-y-1/2 flex gap-3 items-center">
+        <a
+          href={switchLangPath(Astro.url, otherLang)}
+          aria-label="Switch language"
+          class="text-sm text-term-text hover:text-term-fg hover:no-underline"
+        >
+          [{otherLang}]
+        </a>
+        <a
+          href={localizedPath(lang, "/search")}
+          aria-label={`Search on ${SITE.TITLE}`}
+          class="hidden md:flex items-center text-sm text-term-text hover:text-term-fg hover:no-underline"
+        >
+          [grep]
+        </a>
+
+        <button
+          id="header-drawer-button"
+          aria-label={`Toggle drawer open and closed`}
+          class="flex md:hidden text-term-fg"
+        >
+          <svg id="drawer-open" class="size-6 stroke-current stroke-2">
+            <use href="/ui.svg#menu"></use>
+          </svg>
+          <svg id="drawer-close" class="size-6 stroke-current stroke-2 hidden">
+            <use href="/ui.svg#x"></use>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </Container>
+</header>
+
+<style>
+  #header-drawer-button > #drawer-open {
+    @apply block;
+  }
+  #header-drawer-button > #drawer-close {
+    @apply hidden;
+  }
+  #header-drawer-button.open > #drawer-open {
+    @apply hidden;
+  }
+  #header-drawer-button.open > #drawer-close {
+    @apply block;
+  }
+</style>
+
+<script>
+  import { trackEvent } from "@lib/analytics";
+
+  function toggleDrawer() {
+    const drawer = document.getElementById("drawer");
+    drawer?.classList.toggle("open");
+    document.getElementById("header-drawer-button")?.classList.toggle("open");
+    trackEvent("drawer_toggle", { open: drawer?.classList.contains("open") });
+  }
+  document.addEventListener("astro:after-swap", () => {
+    document.getElementById("header-drawer-button")?.addEventListener("click", toggleDrawer);
+  });
+  document.getElementById("header-drawer-button")?.addEventListener("click", toggleDrawer);
+
+  // track language switch: links whose href starts with /en or that point to locale root
+  document.querySelectorAll('a[aria-label="Switch language"]').forEach((a) => {
+    a.addEventListener("click", () => trackEvent("language_switch", { to: a.textContent?.trim() }));
+  });
+
+  document.querySelectorAll("nav a").forEach((a) => {
+    a.addEventListener("click", () =>
+      trackEvent("nav_click", { link: a.textContent?.trim(), destination: a.getAttribute("href") })
+    );
+  });
+
+  document.querySelectorAll('a[aria-label^="Search"]').forEach((a) => {
+    a.addEventListener("click", () => trackEvent("search_open", { source: "header" }));
+  });
+</script>

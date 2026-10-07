@@ -1,0 +1,26 @@
+---
+import { getLocalizedCollection } from "@lib/content";
+import PageLayout from "@layouts/PageLayout.astro";
+import TopLayout from "@layouts/TopLayout.astro";
+import BottomLayout from "@layouts/BottomLayout.astro";
+import Certifications from "@components/Certifications";
+import { useTranslations, type Lang } from "@i18n/ui";
+
+const { lang = "es" } = Astro.props as { lang?: Lang };
+const t = useTranslations(lang);
+
+const certs = (await getLocalizedCollection("certifications", lang)).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
+---
+
+<PageLayout title={t("certifications.title")} description={t("certifications.description")} lang={lang}>
+  <TopLayout>
+    <div class="animate page-heading">{t("certifications.title")}</div>
+  </TopLayout>
+  <BottomLayout>
+    <div class="animate">
+      <Certifications client:load lang={lang} data={certs.map((cert) => ({ imgUrls: cert.data.imgUrls }))} />
+    </div>
+  </BottomLayout>
+</PageLayout>

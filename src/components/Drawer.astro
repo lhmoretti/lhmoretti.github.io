@@ -1,0 +1,41 @@
+---
+import { LINKS } from "@consts";
+import { cn } from "@lib/utils";
+import { localizedPath, switchLangPath } from "@i18n/utils";
+import type { Lang } from "@i18n/ui";
+
+const { lang = "es" } = Astro.props as { lang?: Lang };
+const { pathname } = Astro.url;
+const subpath = pathname.replace(/^\/en/, "").match(/[^/]+/g);
+---
+
+<div
+  id="drawer"
+  class="fixed inset-0 h-0 z-40 overflow-hidden flex flex-col items-center justify-center md:hidden bg-term-bg transition-[height] duration-300 ease-in-out"
+>
+  <nav class="flex flex-col items-center space-y-4 text-lg">
+    {
+      LINKS.map((LINK) => (
+        <a
+          href={localizedPath(lang, LINK.HREF)}
+          class={cn(
+            "text-current hover:no-underline hover:text-term-fg",
+            pathname === localizedPath(lang, LINK.HREF) || "/" + subpath?.[0] === LINK.HREF
+              ? "text-term-fg font-bold"
+              : "text-term-text"
+          )}
+        >
+          ~{LINK.HREF === "/" ? "" : LINK.HREF}
+        </a>
+      ))
+    }
+    <a href={localizedPath(lang, "/search")} class="text-term-text hover:no-underline hover:text-term-fg">[grep]</a>
+    <a href={switchLangPath(Astro.url, lang === "es" ? "en" : "es")} class="text-term-text hover:no-underline hover:text-term-fg">[{lang === "es" ? "en" : "es"}]</a>
+  </nav>
+</div>
+
+<style>
+  #drawer.open {
+    @apply h-full;
+  }
+</style>

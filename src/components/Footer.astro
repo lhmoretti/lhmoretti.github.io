@@ -1,0 +1,31 @@
+---
+import { SITE, SOCIALS } from "@consts";
+import Container from "@components/Container.astro";
+import { useTranslations, type Lang } from "@i18n/ui";
+
+const { lang = "es" } = Astro.props as { lang?: Lang };
+const t = useTranslations(lang);
+---
+
+<footer class="fixed bottom-0 inset-x-0 z-40 bg-term-bg/95 backdrop-blur-sm border-t border-term-border">
+  <section class="py-2">
+    <Container size="md">
+      <div class="flex flex-col gap-1 text-xs text-term-dim">
+        <div class="flex flex-wrap gap-6">
+          {
+            SOCIALS.map((SOCIAL) => (
+              <a href={SOCIAL.HREF} target="_blank" rel="noopener" class="text-term-text no-underline hover:text-term-fg">
+                [{SOCIAL.NAME.toLowerCase()}]
+              </a>
+            ))
+          }
+        </div>
+        <div class="flex flex-wrap gap-6">
+          <a href={lang === "es" ? "/privacy-policy" : "/en/privacy-policy"} class="text-term-text no-underline hover:text-term-fg">[privacy]</a>
+          <a href={lang === "es" ? "/terms" : "/en/terms"} class="text-term-text no-underline hover:text-term-fg">[terms]</a>
+        </div>
+        <div class="text-xs">© {new Date().getFullYear()} {SITE.TITLE} — {t("footer.built")}</div>
+      </div>
+    </Container>
+  </section>
+</footer>

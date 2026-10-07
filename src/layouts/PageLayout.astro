@@ -1,0 +1,49 @@
+---
+import "@styles/global.css";
+import BaseHead from "@components/BaseHead.astro";
+import Header from "@components/Header.astro";
+import Footer from "@components/Footer.astro";
+import Drawer from "@components/Drawer.astro";
+import { SITE } from "@consts";
+import type { Lang } from "@i18n/ui";
+
+const { title, description, lang = "es" } = Astro.props as {
+  title: string;
+  description: string;
+  lang?: Lang;
+};
+---
+
+<!doctype html>
+<html lang={lang} class="dark">
+  <head>
+    <BaseHead title={`${title} | ${SITE.TITLE}`} description={description} />
+  </head>
+  <body>
+    <Header lang={lang} />
+    <Drawer lang={lang} />
+    <main class="pb-16">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <script>
+      import { trackEvent, trackOutboundClick, trackScrollDepth, trackSessionTiming, trackCopy } from "@lib/analytics";
+
+      document.querySelectorAll('a[target="_blank"]').forEach((a) => {
+        a.addEventListener("click", () =>
+          trackOutboundClick(a.getAttribute("href") ?? "", a.textContent?.trim())
+        );
+      });
+
+      document.querySelectorAll('a[href^="/projects/"], a[href^="/en/projects/"], a[href^="/work"]').forEach((a) => {
+        a.addEventListener("click", () =>
+          trackEvent("content_click", { destination: a.getAttribute("href") ?? "" })
+        );
+      });
+
+      trackScrollDepth();
+      trackSessionTiming();
+      trackCopy();
+    </script>
+  </body>
+</html>

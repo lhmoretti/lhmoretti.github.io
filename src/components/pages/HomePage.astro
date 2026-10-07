@@ -1,0 +1,127 @@
+---
+import PageLayout from "@layouts/PageLayout.astro";
+import { getLocalizedCollection, stripLocale } from "@lib/content";
+import { useTranslations, type Lang } from "@i18n/ui";
+import { localizedPath } from "@i18n/utils";
+
+const { lang = "es" } = Astro.props as { lang?: Lang };
+const t = useTranslations(lang);
+
+const projects = (await getLocalizedCollection("projects", lang))
+    .filter((project) => !project.data.draft)
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    .slice(0, 5);
+
+const work = (await getLocalizedCollection("work", lang))
+    .sort(
+        (a, b) =>
+            new Date(b.data.dateStart).getTime() -
+            new Date(a.data.dateStart).getTime(),
+    )
+    .slice(0, 3);
+---
+
+<PageLayout title="Home" description={t("site.description")} lang={lang}>
+    <section class="pt-36 pb-16">
+        <div class="max-w-5xl mx-auto px-5">
+            <p class="mt-6">
+                <span class="text-term-fg">lucas@moretti</span>
+                <span class="text-term-dim">:~$</span> whoami
+            </p>
+            <h1 class="mt-1 text-3xl md:text-4xl font-bold text-term-fg">
+                {t("hero.role")}
+            </h1>
+            <p class="mt-2 text-term-text/80">{t("hero.stack")}</p>
+            <p class="mt-6">
+                <span class="text-term-fg">lucas@moretti</span>
+                <span class="text-term-dim">:~$</span> cat about.txt
+            </p>
+            <p class="mt-1 text-term-text/80">
+                {t("hero.about")}
+                <span class="text-term-fg animate-pulse">█</span>
+            </p>
+        </div>
+    </section>
+
+    <section class="pb-16">
+        <div class="max-w-5xl mx-auto px-5">
+            <h2 class="text-term-fg font-bold">{t("home.projectsCmd")}</h2>
+            <ul class="mt-4 divide-y divide-term-border border border-term-border rounded">
+                {projects.map((project) => (
+                    <li class="p-4 hover:bg-term-panel">
+                        <a
+                            href={localizedPath(
+                                lang,
+                                `/projects/${stripLocale(project.slug)}`,
+                            )}
+                            class="no-underline"
+                        >
+                            <span class="text-term-fg">
+                                {project.data.title}
+                            </span>
+                            <span class="block text-sm text-term-text/70 mt-1">
+                                {project.data.summary}
+                            </span>
+                            <span class="block text-xs text-term-dim mt-1">
+                                {project.data.tags.join(" · ")}
+                            </span>
+                        </a>
+                    </li>
+                ))}
+            </ul>
+            <p class="mt-3 text-sm">
+                <a href={localizedPath(lang, "/projects")}>
+                    {t("home.projectsLink")}
+                </a>
+            </p>
+        </div>
+    </section>
+
+    <section class="pb-16">
+        <div class="max-w-5xl mx-auto px-5">
+            <h2 class="text-term-fg font-bold">{t("home.workCmd")}</h2>
+            <ul class="mt-4 space-y-3">
+                {work.map((entry) => (
+                    <li class="text-sm">
+                        <span class="text-term-dim">[{entry.data.role}]</span>{" "}
+                        <span class="text-term-text">{entry.data.company}</span>
+                    </li>
+                ))}
+            </ul>
+            <p class="mt-3 text-sm">
+                <a href={localizedPath(lang, "/work")}>{t("home.workLink")}</a>
+            </p>
+        </div>
+    </section>
+
+    <section class="pb-16">
+        <div class="max-w-5xl mx-auto px-5">
+            <h2 class="text-term-fg font-bold">{t("cv.cmd")}</h2>
+            <ul class="mt-6 divide-y divide-term-border border border-term-border rounded">
+                <li class="p-4 flex items-center justify-between gap-4 hover:bg-term-panel">
+                    <span class="text-term-text">LucasMoretti-ES.pdf</span>
+                    <a href="/LucasMoretti-ES.pdf" download data-cv="es">
+                        {t("cv.es")}
+                    </a>
+                </li>
+                <li class="p-4 flex items-center justify-between gap-4 hover:bg-term-panel">
+                    <span class="text-term-text">LucasMoretti-EN.pdf</span>
+                    <a href="/LucasMoretti-EN.pdf" download data-cv="en">
+                        {t("cv.en")}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <script>
+        import { trackEvent } from "@lib/analytics";
+        document
+            .querySelectorAll<HTMLAnchorElement>("a[data-cv]")
+            .forEach((a) => {
+                a.addEventListener("click", () =>
+                    trackEvent("cv_download", { cv_lang: a.dataset.cv }),
+                );
+            });
+    </script>
+</PageLayout>
